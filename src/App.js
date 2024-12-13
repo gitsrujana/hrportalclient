@@ -1,24 +1,42 @@
-import logo from './logo.svg';
+
+import { Route, Routes } from 'react-router-dom';
 import './App.css';
 
+
+import Navbar from './component/Navbar';
+import Addemployee from './component/Addemployee';
+import EmployeeList from './component/EmployeeList';
+import Login from './component/Login';
+import EmployeeDashboard from './component/Dashboard/EmployeeDasboard';
+import { AuthProvider } from './component/AuthProvider ';
+import Homepage from './component/Homepage';
+import AdminDashboard from './component/Dashboard/AdminDashboard';
+import { useState } from 'react';
+
+
 function App() {
+
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+     <AuthProvider>
+  <Navbar/>
+
+ 
+
+  <Routes>
+    
+         <Route path='/homepage' element={<Homepage/>}/>
+        <Route path='/Addemployee' element={<Addemployee/>}/>
+        <Route path='/Login' element={<Login/>}/>
+        <Route path='/employeelist' element={<EmployeeList/>}/>
+        <Route path='/employeedashboard' element={<EmployeeDashboard/>}/>
+        <Route path='/admindashboard' element={<AdminDashboard/>}/>
+  </Routes>
+
+  </AuthProvider>
     </div>
+    
   );
 }
 
