@@ -21,7 +21,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthProvider ";
 
 const Login = () => {
-  const { login } = useAuth();
+  const { login  } = useAuth();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.down("md"));
@@ -81,51 +81,30 @@ const Login = () => {
     }
   };
 
-  const handleLogin = async () => {
-    let hasError = false;
-    const newError = { email: "", password: "" };
-
-    if (!email) {
-      newError.email = "Email is required";
-      hasError = true;
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      newError.email = "Enter a valid email";
-      hasError = true;
-    }
-
-    if (!password) {
-      newError.password = "Password is required";
-      hasError = true;
-    }
-
-    if (!termsAccepted) {
-      alert("You must agree to the terms and conditions");
-      hasError = true;
-    }
-
-    setError(newError);
-
-    if (!hasError) {
-      try {
-        setLoading(true);
-        const response = await axios.post(
-          "http://localhost:5000/v1/api/employees/login",
-          { email, password }
-        );
-
-        alert("Login successful!");
-
-        console.log("Response:", response.data);
-        login();
-        navigate("/employeedashboard");
-      } catch (err) {
-        console.error("Error during login:", err);
-        alert("Login failed! Please try again.");
-      } finally {
-        setLoading(false);
-      }
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post("http://localhost:5000/v1/api/employees/login", {
+        email,
+        password,
+      });
+    
+      
+      const message = response.data.message;
+      alert(message);
+      console.log("Response:", response.data);
+    
+      login();
+      navigate("/employeedashboard");
+    } catch (err) {
+      console.error("Error during login:", err);
+      alert("Login failed! Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
+
+
 
   const handleForgotPassword = async () => {
     if (!forgotEmail) {
@@ -183,66 +162,15 @@ const Login = () => {
         height: isMobile ? "115vh" : isTablet ? "100%" : "100%",
         width: isMobile ? "100%" : isTablet ? "100%" : "100%",
         padding: isMobile || isTablet ? 2 : 4,
-        backgroundImage:`url("https://wallpaper.dog/large/20559316.jpg")`,
+        
         backgroundSize: "cover",
         backgroundPosition: "center",
         boxShadow: 54, 
-        marginTop: isMobile ? "-740px" : isTablet ? "-600px" : "-600px",
+        marginTop:"10%"
       }}
     >
       <Grid container spacing={2} alignItems="center">
-        <Grid
-          item
-          xs={12}
-          md={6}
-          sx={{ textAlign: isMobile ? "center" : "left" }}
-        >
-          <Typography
-            sx={{
-              fontSize: { xs: "1rem", sm: "1rem", md: "2.5rem" },
-              fontWeight: 0,
-              textAlign: isMobile ? "center" : "center",
-              color: "white",
-              marginTop: isMobile ? "1%" : isTablet ? "" : "0%",
-              marginLeft: isMobile ? "0" : isTablet ? "" : "25%",
-              letterSpacing: "0.2rem",
-              textShadow: "2px 4px 8px rgba(0, 0, 0, 0.3)",
-              animation: "bounceIn 2s ease-in-out",
-              "@keyframes bounceIn": {
-                "0%": {
-                  opacity: 0,
-                  transform: "scale(0.5)",
-                },
-                "60%": {
-                  opacity: 1,
-                  transform: "scale(1.2)",
-                },
-                "100%": {
-                  transform: "scale(1)",
-                },
-              },
-              "&:hover": {
-                animation: "hoverBounce 1.5s ease-in-out",
-              },
-              "@keyframes hoverBounce": {
-                "0%": {
-                  transform: "scale(1)",
-                },
-                "30%": {
-                  transform: "scale(1.2)",
-                },
-                "60%": {
-                  transform: "scale(0.9)",
-                },
-                "100%": {
-                  transform: "scale(1)",
-                },
-              },
-            }}
-          >
-            Welcome to <br /> Trie Tree Technology <br /> Pvt. Ltd
-          </Typography>
-        </Grid>
+       
 
         <Grid item xs={12} md={6}>
           <Box
@@ -337,9 +265,9 @@ const Login = () => {
                     mb: 2,
                   }}
                   onClick={handleLogin}
-                  disabled={loading}
+                
                 >
-                  {loading ? "Logging in..." : "Login"}
+                  login
                 </Button>
 
                 <Button
@@ -389,9 +317,9 @@ const Login = () => {
                         },
                       }}
                       onClick={handleOTPLogin}
-                      disabled={loading}
+                
                     >
-                      {loading ? "Verifying..." : "Submit OTP"}
+                     submit otp
                     </Button>
                   </Box>
                 </Popover>

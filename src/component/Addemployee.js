@@ -96,8 +96,8 @@ const Addemployee = () => {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        marginTop: isMobile ? "-630px" : "-40%",
-        backgroundImage:`url("https://wallpaper.dog/large/20559316.jpg")`,
+   
+      marginTop:"5%",
         backgroundSize: "cover",
         backgroundPosition: "center",
         boxShadow: 54, 

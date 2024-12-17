@@ -10,8 +10,8 @@ import Login from './component/Login';
 import EmployeeDashboard from './component/Dashboard/EmployeeDasboard';
 import { AuthProvider } from './component/AuthProvider ';
 import Homepage from './component/Homepage';
-import AdminDashboard from './component/Dashboard/AdminDashboard';
-import { useState } from 'react';
+
+
 
 
 function App() {
@@ -31,7 +31,7 @@ function App() {
         <Route path='/Login' element={<Login/>}/>
         <Route path='/employeelist' element={<EmployeeList/>}/>
         <Route path='/employeedashboard' element={<EmployeeDashboard/>}/>
-        <Route path='/admindashboard' element={<AdminDashboard/>}/>
+     
   </Routes>
 
   </AuthProvider>

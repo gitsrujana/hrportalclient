@@ -205,9 +205,33 @@ const LeaveApplicationForm = () => {
                 />
               </Grid>
               <Grid item xs={12} sx={{ textAlign: "right" }}>
-                <Button type="submit" variant="contained" color="primary">
-                  Submit
-                </Button>
+               <Button
+               variant="contained"
+              
+               sx={{
+                 width: "20%",
+           
+                 padding: "12px 20px",
+                 textTransform: "none",
+                 fontSize: "1rem",
+                 fontWeight: "bold",
+                 color: "#ffffff", 
+                 backgroundColor: "#006666",
+                 borderRadius: 8, 
+                 boxShadow: "0px 4px 12px #004d4d", 
+                 transition: "all 0.3s ease", 
+                 "&:hover": {
+                   backgroundColor: "#004d4d",
+                   boxShadow: "0px 6px 16px rgba(0, 77, 77, 0.8)", 
+                   transform: "scale(1.05)",
+                 },
+                 "&:active": {
+                   transform: "scale(0.97)", 
+                 },
+               }}
+             >
+               submit
+                      </Button>
               </Grid>
             </Grid>
           </form>

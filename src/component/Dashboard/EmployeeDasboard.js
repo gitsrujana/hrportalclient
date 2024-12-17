@@ -4,25 +4,65 @@ import {
   Grid,
   Button,
   Typography,
-  IconButton,
   Modal,
   Container,
-  Menu,
-  MenuItem,
-  useMediaQuery,
+  IconButton
 } from "@mui/material";
-import { AccessTime, Logout, ArrowDropDown, CalendarToday } from "@mui/icons-material";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import LeaveApplicationForm from "../LeaveApplicationForm ";
+import LeaveApplicationForm from "../LeaveApplicationForm "; 
 import { useTheme } from "@mui/material/styles";
 import axios from "axios";
-const Homepage = () => {
+import { useNavigate } from "react-router-dom";
+import { AccessTime,   CalendarToday } from "@mui/icons-material";
+
+
+const EmployeeDashboard = () => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const isTablet = useMediaQuery(theme.breakpoints.down("md"));
+  const navigate = useNavigate();
   const [leaveModalOpen, setLeaveModalOpen] = useState(false);
- const [employees, setEmployees] = useState([]);
+  const [employees, setEmployees] = useState([]);
+  const [loginTime, setLoginTime] = useState(null);
+  const [logoutTime, setLogoutTime] = useState(null);
+  const [workingHours, setWorkingHours] = useState(null);
+
+  const loggedInEmail = localStorage.getItem("loggedInEmail");
+
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/v1/api/employees/get");
+        setEmployees(response.data);
+      } catch (error) {
+        console.error("Error fetching employees:", error);
+        alert("Failed to fetch employees. Please try again.");
+      }
+    };
+    fetchEmployees();
+
+    const storedLoginTime = localStorage.getItem("loginTime");
+    if (storedLoginTime) {
+      const loginDate = new Date(storedLoginTime);
+      setLoginTime(loginDate);
+    }
+
+    const storedLogoutTime = localStorage.getItem("logoutTime");
+    if (storedLogoutTime) {
+      const logoutDate = new Date(storedLogoutTime);
+      setLogoutTime(logoutDate);
+      calculateWorkingHours(new Date(storedLoginTime), logoutDate);
+    }
+  }, []);
+
+  const calculateWorkingHours = (login, logout) => {
+    const timeDifference = logout - login; 
+    const hours = Math.floor(timeDifference / (1000 * 60 * 60)); 
+    const minutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60)); 
+    setWorkingHours(`${hours} hours ${minutes} minutes`);
+  };
+
+  const currentEmployee = employees.find((employee) => employee.email === loggedInEmail);
+
   const handleOpenLeaveModal = () => {
     setLeaveModalOpen(true);
   };
@@ -31,51 +71,52 @@ const Homepage = () => {
     setLeaveModalOpen(false);
   };
 
-
-  useEffect(() => {
-    const fetchEmployees = async () => {
-      try {
-        const response = await axios.get(
-          "http://localhost:5000/v1/api/employees/get"
-        );
-        setEmployees(response.data);
-      } catch (error) {
-        console.error("Error fetching employees:", error);
-        alert("Failed to fetch employees. Please try again.");
-      }
-    };
-
-    fetchEmployees();
-  }, []);
-
+  
   return (
-    <Box sx={{ display: "flex", height: "100vh" ,
-    
-      backgroundImage:`url("https://wallpaper.dog/large/20559316.jpg")`,
-      backgroundSize: "cover",
-      backgroundPosition: "center",
-      boxShadow: 54, 
-      marginTop: isMobile ? "-740px" : isTablet ? "-600px" : "-610px",
-
-    }}>
-      <Box sx={{ flexGrow: 1,  }}>
-        <Header employees={employees}/>
+    <Box sx={{ display: "flex", height: "100vh", boxShadow: 54, marginTop: "8%" }}>
+      <Box sx={{ flexGrow: 1 }}>
+        <Header
+          currentEmployee={currentEmployee}
+          loginTime={loginTime}
+          logoutTime={logoutTime}
+          workingHours={workingHours}
+        />
         <Container sx={{ mt: 4 }}>
           <Grid container spacing={4}>
             <Grid item xs={12} sm={6} md={4}>
               <ClockWithCalendar />
             </Grid>
-            <Grid item xs={12} sm={6} md={4}>
-              <BreakDropdown />
-            </Grid>
+            
             <Grid item xs={12}>
-              <Button
-                variant="contained"
-                onClick={handleOpenLeaveModal}
-                sx={{ width: "20%", p: 1,textTransform:"none" }}
-              >
-                Apply for Leave
-              </Button>
+            <Button
+  variant="contained"
+  onClick={handleOpenLeaveModal}
+  sx={{
+    width: "20%",
+    marginTop:"-13%",
+    padding: "12px 20px",
+    textTransform: "none",
+    fontSize: "1rem",
+    fontWeight: "bold",
+    color: "#ffffff", 
+    backgroundColor: "#006666",
+    borderRadius: 8, 
+    boxShadow: "0px 4px 12px #004d4d", 
+    transition: "all 0.3s ease", 
+    "&:hover": {
+      backgroundColor: "#004d4d",
+      boxShadow: "0px 6px 16px rgba(0, 77, 77, 0.8)", 
+      transform: "scale(1.05)",
+    },
+    "&:active": {
+      transform: "scale(0.97)", 
+    },
+  }}
+>
+  Apply for Leave
+         </Button>
+
+
             </Grid>
           </Grid>
         </Container>
@@ -84,8 +125,8 @@ const Homepage = () => {
           <Box
             sx={{
               position: "absolute",
-              marginTop:"28%",
-              marginLeft:"70%",
+              marginTop: "28%",
+              marginLeft: "70%",
               transform: "translate(-50%, -50%)",
               bgcolor: "white",
               boxShadow: 24,
@@ -93,51 +134,105 @@ const Homepage = () => {
               borderRadius: 2,
               maxWidth: 600,
               width: "100%",
-              height:"100vh"
+              height: "100vh",
             }}
           >
             <LeaveApplicationForm onClose={handleCloseLeaveModal} />
           </Box>
         </Modal>
+
+       
       </Box>
     </Box>
   );
 };
 
-const Header = ({employees}) => (
-
-
+const Header = ({ currentEmployee, loginTime, logoutTime, workingHours }) => {
+  return (
+    <Box
+    sx={{
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      padding: 3,
   
-  <Box sx={{ display: "flex", alignItems: "center", padding: 2 }}>
-       {employees.map((employee) => (
-    <Typography variant="h6" sx={{ml:30, fontSize: "1.5rem", fontWeight: "bold" ,color:"white"}}>
-      Welcome,{employee.name}
-
+    
+    }}
+  >
+    <Typography
+      variant="h4"
+      sx={{
+        fontSize: "2rem",
+        fontWeight: 700,
+        color: "#006666", 
+        textShadow: "1px 1px 5px rgba(0, 0, 0, 0.3)", 
+        marginLeft:"10%"
+      }}
+    >
+      👋 Welcome, {currentEmployee?.name || "Employee"}
     </Typography>
-       ))}
-    <Typography variant="body2" sx={{ ml: 5,color:"white" }}>
-      Last Login: [Date & Time]
-    </Typography>
+  
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        padding: 2,
+        backgroundColor: "rgba(255, 255, 255, 0.8)", 
+        borderRadius: 3,
+        boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)", 
+        textAlign:"start",
+        marginRight:"10%"
+      }}
+    >
+      <Typography
+        variant="body1"
+        sx={{
+          color: "#ff5722", // Bright orange for labels
+          fontWeight: 600,
+          marginBottom: "0.5rem",
+        }}
+      >
+        🔓 Last Login: {loginTime ? loginTime.toLocaleString() : "N/A"}
+      </Typography>
+      <Typography
+        variant="body1"
+        sx={{
+          color: "#3f51b5", 
+          fontWeight: 600,
+          marginBottom: "0.5rem",
+        }}
+      >
+        🔒 Last Logout: {logoutTime ? logoutTime.toLocaleString() : "N/A"}
+      </Typography>
+      <Typography
+        variant="body1"
+        sx={{
+          color: "#4caf50", 
+          fontWeight: 600,
+        }}
+      >
+        ⏱️ Working Hours: {workingHours || "N/A"}
+      </Typography>
+    </Box>
   </Box>
-);
+  
+  
+  );
+};
 
 const ClockWithCalendar = () => {
   const [time, setTime] = useState(new Date());
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
-
   const handleCalendarOpen = () => {
     setIsCalendarOpen(true);
   };
-
   const handleCalendarClose = () => {
     setIsCalendarOpen(false);
   };
-
   return (
     <Box
       sx={{
@@ -157,7 +252,6 @@ const ClockWithCalendar = () => {
       <IconButton color="primary" onClick={handleCalendarOpen} sx={{ ml: 2 }}>
         <CalendarToday />
       </IconButton>
-
       <Modal open={isCalendarOpen} onClose={handleCalendarClose}>
         <Box
           sx={{
@@ -181,43 +275,5 @@ const ClockWithCalendar = () => {
   );
 };
 
-const BreakDropdown = () => {
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [selectedBreak, setSelectedBreak] = useState("");
 
-  const handleMenuOpen = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = (breakType) => {
-    if (breakType) setSelectedBreak(breakType);
-    setAnchorEl(null);
-  };
-
-  return (
-    <Box sx={{ bgcolor: "white", p: 2, borderRadius: 1, boxShadow: 1 }}>
-      <Typography variant="h6" sx={{ mb: 1 }}>
-        Breaks
-      </Typography>
-      <Button
-        variant="contained"
-        endIcon={<ArrowDropDown />}
-        onClick={handleMenuOpen}
-        fullWidth
-      >
-        {selectedBreak || "Select Break"}
-      </Button>
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={() => handleMenuClose(null)}
-      >
-        <MenuItem onClick={() => handleMenuClose("Tea Break")}>Tea Break</MenuItem>
-        <MenuItem onClick={() => handleMenuClose("Lunch Break")}>Lunch Break</MenuItem>
-        <MenuItem onClick={() => handleMenuClose("Back to Work")}>Back to Work</MenuItem>
-      </Menu>
-    </Box>
-  );
-};
-
-export default Homepage;
+export default EmployeeDashboard;
