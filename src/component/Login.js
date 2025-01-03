@@ -1,395 +1,274 @@
 import React, { useState } from "react";
-import axios from "axios";
 import {
-  Box,
   TextField,
   Button,
+  Box,
+  Typography,
   Checkbox,
   FormControlLabel,
-  Typography,
-  useMediaQuery,
   Link,
-  Popover,
   InputAdornment,
   IconButton,
+  Popover,
   Grid,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { useTheme } from "@mui/material/styles";
-
+import { useForm, Controller } from "react-hook-form";
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthProvider ";
 
-const Login = () => {
-  const { login  } = useAuth();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const isTablet = useMediaQuery(theme.breakpoints.down("md"));
-  const isDesktop = useMediaQuery(theme.breakpoints.up("lg"));
-
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState({ email: "", password: "" });
-  const [termsAccepted, setTermsAccepted] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [otp, setOtp] = useState("");
-  const [forgotEmail, setForgotEmail] = useState("");
-  const [forgotPasswordMode, setForgotPasswordMode] = useState(false);
-  const [otpAnchorEl, setOtpAnchorEl] = useState(null);
+const LoginForm = () => {
+  const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
-
+  const [otp, setOtp] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [otpAnchorEl, setOtpAnchorEl] = useState(null);
   const navigate = useNavigate();
 
-  const handleLoginWithOTPClick = (event) => {
+  const {
+    handleSubmit,
+    control,
+    formState: { errors },
+    getValues,
+  } = useForm();
+
+  const onSubmit = async (data) => {
+    try {
+      setLoading(true);
+      const response = await axios.post(
+        "http://localhost:5000/v1/api/employees/login",
+        { email: data.email, password: data.password }
+      );
+
+      localStorage.setItem("loggedInEmail", data.email);
+      const message = response.data.message;
+      alert(message);
+      login();
+      navigate("/employeedashboard");
+    } catch (error) {
+      console.error("Login Error:", error.response?.data || error.message);
+      alert("Login Failed: " + (error.response?.data.message || "Error occurred"));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSendOtp = async () => {
+    const email = getValues("email");
+    if (!email) {
+      alert("Please enter your email to receive OTP.");
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/v1/api/employees/otp/send",
+        { email }
+      );
+      alert(response.data.message || "OTP sent successfully!");
+      setOtpSent(true);
+      setOtpAnchorEl(true);
+    } catch (error) {
+      console.error("Send OTP Error:", error.response?.data || error.message);
+      alert("Failed to send OTP: " + (error.response?.data.message || "Error occurred"));
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    const email = getValues("email");
+    if (!email || !otp) {
+      alert("Please enter your email and OTP.");
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/v1/api/employees/otp/verify",
+        {
+          email,
+          otp,
+        }
+      );
+      alert(response.data.message || "Login successful!");
+      setOtpSent(false);
+      setOtpAnchorEl(null);
+      login();
+      navigate("/employeedashboard");
+    } catch (error) {
+      console.error("Verify OTP Error:", error.response?.data || error.message);
+      alert("OTP Verification Failed: " + (error.response?.data.message || "Error occurred"));
+    }
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword((prev) => !prev);
+  };
+
+  const handleLoginWithOtpClick = (event) => {
     setOtpAnchorEl(event.currentTarget);
     handleSendOtp();
   };
-
-  const otpOpen = Boolean(otpAnchorEl);
 
   const closeOtpPopover = () => {
     setOtpAnchorEl(null);
   };
 
-  const handleClickShowPassword = () => {
-    setShowPassword((prev) => !prev);
-  };
-
-  const handleOTPLogin = async () => {
-    if (!otp) {
-      alert("Please enter the OTP");
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const response = await axios.post(
-        "http://localhost:5000/v1/api/employees/otp/verify",
-        { email, otp }
-      );
-
-      alert("OTP Login successful!");
-      login();
-      navigate("/employeedashboard");
-      console.log("Response:", response.data);
-    } catch (err) {
-      console.error("Error during OTP login:", err);
-      alert("OTP Login failed! Please try again.");
-    } finally {
-      setLoading(false);
-      closeOtpPopover();
-    }
-  };
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await axios.post("http://localhost:5000/v1/api/employees/login", {
-        email,
-        password,
-      });
-    
-      
-      const message = response.data.message;
-      alert(message);
-      console.log("Response:", response.data);
-    
-      login();
-      navigate("/employeedashboard");
-    } catch (err) {
-      console.error("Error during login:", err);
-      alert("Login failed! Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-
-
-  const handleForgotPassword = async () => {
-    if (!forgotEmail) {
-      alert("Please enter your email");
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const response = await axios.post(
-        "http://localhost:5000/v1/api/employees/forgot-password",
-        { email: forgotEmail }
-      );
-
-      alert("Password reset link sent!");
-      console.log("Response:", response.data);
-    } catch (err) {
-      console.error("Error during password reset:", err);
-      alert("Password reset failed! Please try again.");
-    } finally {
-      setLoading(false);
-      setForgotPasswordMode(false);
-    }
-  };
-
-  const handleSendOtp = async () => {
-    if (!email) {
-      alert("Please enter your email");
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const response = await axios.post(
-        "http://localhost:5000/v1/api/employees/otp/send",
-        { email }
-      );
-
-      alert("OTP sent to your email!");
-      console.log("Response:", response.data);
-    } catch (err) {
-      console.error("Error sending OTP:", err);
-      alert("Failed to send OTP! Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: isMobile ? "115vh" : isTablet ? "100%" : "100%",
-        width: isMobile ? "100%" : isTablet ? "100%" : "100%",
-        padding: isMobile || isTablet ? 2 : 4,
-        
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        boxShadow: 54, 
-        marginTop:"10%"
-      }}
-    >
-      <Grid container spacing={2} alignItems="center">
-       
-
-        <Grid item xs={12} md={6}>
-          <Box
-            sx={{
-              width: isMobile ? "100%" : 500,
-              padding: isMobile ? 1 : 2,
-              backgroundColor: "white",
-              borderRadius: 2,
-              boxShadow: 3,
-              marginTop: "%",
-              marginLeft: isMobile ? "0" : "25%",
-              fontSize: { xs: "1rem", sm: "1rem", md: "2.5rem" },
-              boxShadow: 54, 
-            }}
-          >
-            <Typography sx={{ color: "black", textAlign: "center" }}>
-              {forgotPasswordMode ? "Forgot Password" : "Login "}
-            </Typography>
-
-            {!forgotPasswordMode ? (
-              <>
-                <Box sx={{ mb: 3 }}>
-                  <Typography
-                    variant="subtitle1"
-                    sx={{
-                      color: "black",
-                      fontWeight: "bold",
-                      mb: 1,
-                      textAlign: "start",
-                    }}
-                  >
-                    Email:
-                  </Typography>
-                  <TextField
-                    fullWidth
-                    placeholder="Enter Email"
-                    variant="outlined"
-                    sx={{ backgroundColor: "white", borderRadius: 1 }}
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    error={!!error.email}
-                    helperText={error.email}
-                  />
-                </Box>
-
-                <Box sx={{ mb: 3 }}>
-                  <Typography
-                    variant="subtitle1"
-                    sx={{
-                      color: "black",
-                      fontWeight: "bold",
-                      mb: 1,
-                      textAlign: "start",
-                    }}
-                  >
-                    Password:
-                  </Typography>
-                  <TextField
-                    fullWidth
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Enter Password"
-                    variant="outlined"
-                    sx={{ backgroundColor: "white", borderRadius: 1 }}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    error={!!error.password}
-                    helperText={error.password}
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton
-                            onClick={handleClickShowPassword}
-                            edge="end"
-                          >
-                            {showPassword ? <VisibilityOff /> : <Visibility />}
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                </Box>
-
-                <Button
-                  fullWidth
-                  variant="contained"
-                  sx={{
-                    background: "linear-gradient(135deg, #00c853, #ff6f00)",
-                    "&:hover": {
-                      background: "linear-gradient(135deg, #ff6f00, #00c853)",
-                    },
-                    textTransform: "none",
-                    mb: 2,
-                  }}
-                  onClick={handleLogin}
-                
-                >
-                  login
-                </Button>
-
-                <Button
-                  fullWidth
-                  variant="outlined"
-                  sx={{
-                    borderColor: "#007bff",
-                    color: "#007bff",
-                    textTransform: "none",
-                    mb: 2,
-                    "&:hover": { backgroundColor: "#e6f0ff" },
-                  }}
-                  onClick={handleLoginWithOTPClick}
-                >
-                  Login with OTP
-                </Button>
-
-                <Popover
-                  open={otpOpen}
-                  anchorEl={otpAnchorEl}
-                  onClose={closeOtpPopover}
-                  anchorOrigin={{
-                    vertical: "center",
-                    horizontal: "center",
-                  }}
-                >
-                  <Box sx={{ p: 3, width: 300 }}>
-                    <Typography variant="h6" sx={{ mb: 2 }}>
-                      Enter OTP
-                    </Typography>
-                    <TextField
-                      fullWidth
-                      placeholder="Enter OTP"
-                      variant="outlined"
-                      sx={{ mb: 2 }}
-                      value={otp}
-                      onChange={(e) => setOtp(e.target.value)}
-                    />
-                    <Button
-                      fullWidth
-                      variant="contained"
-                      sx={{
-                        background: "linear-gradient(135deg, #ff6f00, #00c853)",
-                        "&:hover": {
-                          background:
-                            "linear-gradient(135deg, #ff6f00, #00c853)",
-                        },
-                      }}
-                      onClick={handleOTPLogin}
-                
-                    >
-                     submit otp
-                    </Button>
-                  </Box>
-                </Popover>
-
-                <Link
-                  component="button"
-                  variant="body2"
-                  sx={{
-                    textAlign: "center",
-                    display: "block",
-                    mt: 2,
-                    color: "#007bff",
-                  }}
-                  onClick={() => setForgotPasswordMode(true)}
-                >
-                  Forgot Password?
-                </Link>
-
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      sx={{ color: "black" }}
-                      checked={termsAccepted}
-                      onChange={(e) => setTermsAccepted(e.target.checked)}
-                    />
-                  }
-                  label={
-                    <Typography sx={{ color: "black" }}>
-                      You agree with Terms & Conditions
-                    </Typography>
-                  }
-                />
-              </>
-            ) : (
-              <>
+    <Grid container justifyContent="center" alignItems="center" sx={{ minHeight: "100vh", padding: 2 }}>
+      <Grid item xs={12} sm={8} md={6} lg={4}>
+        <Box
+          sx={{
+            padding: "20px",
+            border: "1px solid #e0e0e0",
+            borderRadius: "10px",
+            boxShadow: 3,
+            backgroundColor: "#fff",
+          }}
+        >
+          <Typography variant="h5" align="center" mb={2}>
+            Login
+          </Typography>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <Controller
+              name="email"
+              control={control}
+              defaultValue=""
+              rules={{
+                required: "Email is required",
+                pattern: {
+                  value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
+                  message: "Invalid email format",
+                },
+              }}
+              render={({ field }) => (
                 <TextField
+                  {...field}
+                  label="Email"
                   fullWidth
-                  placeholder="Enter your email"
+                  margin="normal"
                   variant="outlined"
-                  sx={{ mb: 2 }}
-                  value={forgotEmail}
-                  onChange={(e) => setForgotEmail(e.target.value)}
+                  error={Boolean(errors.email)}
+                  helperText={errors.email?.message}
                 />
-                <Button
+              )}
+            />
+
+            <Controller
+              name="password"
+              control={control}
+              defaultValue=""
+              rules={{
+                required: "Password is required",
+                minLength: {
+                  value: 6,
+                  message: "Password must be at least 6 characters",
+                },
+              }}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Password"
                   fullWidth
-                  variant="contained"
-                  sx={{
-                    backgroundColor: "#007bff",
-                    "&:hover": { backgroundColor: "#0056b3" },
+                  margin="normal"
+                  variant="outlined"
+                  type={showPassword ? "text" : "password"}
+                  error={Boolean(errors.password)}
+                  helperText={errors.password?.message}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton onClick={togglePasswordVisibility} edge="end">
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
                   }}
-                  onClick={handleForgotPassword}
-                  disabled={loading}
-                >
-                  {loading ? "Sending..." : "Send Reset Link"}
-                </Button>
-                <Button
-                  fullWidth
-                  variant="text"
-                  sx={{ mt: 2 }}
-                  onClick={() => setForgotPasswordMode(false)}
-                >
-                  Back to Login
-                </Button>
-              </>
-            )}
-          </Box>
-        </Grid>
+                />
+              )}
+            />
+
+            <FormControlLabel
+              control={<Checkbox color="primary" />}
+              label="You agree with Terms & Conditions"
+              sx={{ mt: 1 }}
+            />
+
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{
+                background: "linear-gradient(135deg, #00c853, #ff6f00)",
+                "&:hover": {
+                  background: "linear-gradient(135deg, #ff6f00, #00c853)",
+                },
+                textTransform: "none",
+                mb: 2,
+              }}
+              disabled={loading}
+            >
+              {loading ? "Logging in..." : "Login"}
+            </Button>
+
+            <Button
+              fullWidth
+              variant="outlined"
+              color="secondary"
+              onClick={handleLoginWithOtpClick}
+            >
+              Login with OTP
+            </Button>
+          </form>
+
+          <Popover
+            open={Boolean(otpAnchorEl)}
+            anchorEl={otpAnchorEl}
+            onClose={closeOtpPopover}
+            anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+            transformOrigin={{ vertical: "top", horizontal: "center" }}
+          >
+            <Box p={2}>
+              <Typography variant="body1">Enter OTP sent to your email</Typography>
+              <TextField
+                margin="normal"
+                fullWidth
+                variant="outlined"
+                label="OTP"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+              />
+              <Button
+                variant="contained"
+                fullWidth
+                onClick={handleVerifyOtp}
+                sx={{
+                  background: "linear-gradient(135deg, #ff6f00, #00c853)",
+                  "&:hover": {
+                    background: "linear-gradient(135deg, #ff6f00, #00c853)",
+                  },
+                }}
+              >
+                Submit OTP
+              </Button>
+            </Box>
+          </Popover>
+
+          <Typography align="center">
+            <Link
+              href="#"
+              underline="hover"
+              color="primary"
+              onClick={() => alert("Forgot Password clicked!")}
+            >
+              Forgot Password?
+            </Link>
+          </Typography>
+        </Box>
       </Grid>
-    </Box>
+    </Grid>
   );
 };
 
-export default Login;
+export default LoginForm;

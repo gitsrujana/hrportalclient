@@ -1,31 +1,28 @@
 import React, { useState, useEffect } from "react";
 import {
   Box,
-  Grid,
-  Button,
   Typography,
+  Button,
   Modal,
-  Container,
-  IconButton
+  Backdrop,
+  Fade,
 } from "@mui/material";
-import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import LeaveApplicationForm from "../LeaveApplicationForm "; 
+import moment from "moment";
 import { useTheme } from "@mui/material/styles";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import { AccessTime,   CalendarToday } from "@mui/icons-material";
-
+import { NavLink, useNavigate } from "react-router-dom";
 
 const EmployeeDashboard = () => {
   const theme = useTheme();
   const navigate = useNavigate();
-  const [leaveModalOpen, setLeaveModalOpen] = useState(false);
-  const [employees, setEmployees] = useState([]);
-  const [loginTime, setLoginTime] = useState(null);
-  const [logoutTime, setLogoutTime] = useState(null);
-  const [workingHours, setWorkingHours] = useState(null);
 
+  const [employees, setEmployees] = useState([]);
+  const [openPopover, setOpenPopover] = useState(true);
+  const [checkintime, setCheckintime] = useState(null);
+  const [checkouttime, setCheckouttime] = useState(null);
+  const [workinghours, setWorkinghours] = useState(null);
+  const [checkedIn, setCheckedIn] = useState(false);
   const loggedInEmail = localStorage.getItem("loggedInEmail");
 
   useEffect(() => {
@@ -38,242 +35,245 @@ const EmployeeDashboard = () => {
         alert("Failed to fetch employees. Please try again.");
       }
     };
+
     fetchEmployees();
-
-    const storedLoginTime = localStorage.getItem("loginTime");
-    if (storedLoginTime) {
-      const loginDate = new Date(storedLoginTime);
-      setLoginTime(loginDate);
-    }
-
-    const storedLogoutTime = localStorage.getItem("logoutTime");
-    if (storedLogoutTime) {
-      const logoutDate = new Date(storedLogoutTime);
-      setLogoutTime(logoutDate);
-      calculateWorkingHours(new Date(storedLoginTime), logoutDate);
-    }
   }, []);
 
-  const calculateWorkingHours = (login, logout) => {
-    const timeDifference = logout - login; 
-    const hours = Math.floor(timeDifference / (1000 * 60 * 60)); 
-    const minutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60)); 
-    setWorkingHours(`${hours} hours ${minutes} minutes`);
+  const handleCheckIn = async () => {
+    try {
+      const response = await axios.post("http://localhost:5000/v1/api/attendance/checkin", {
+        email: loggedInEmail,
+      });
+
+      const checkinDate = moment(response.data.checkintime).toDate();
+      
+      if (moment(checkinDate).isValid()) {
+        setCheckintime(checkinDate);
+        setCheckedIn(true);
+        setOpenPopover(false);
+      } else {
+        throw new Error("Invalid date returned by the server");
+      }
+    } catch (error) {
+      console.error("Error during check-in:", error);
+      alert("Failed to check in. Please try again.");
+    }
+  };
+
+  const handleCheckOut = async () => {
+    try {
+      const response = await axios.post("http://localhost:5000/v1/api/attendance/checkout", {
+        email: loggedInEmail,
+      });
+
+      const checkoutDate = moment(response.data.checkouttime).toDate();
+      if (moment(checkoutDate).isValid()) {
+        setCheckouttime(checkoutDate);
+        setCheckedIn(false);
+
+       
+        const checkinMoment = moment(checkintime);
+        const checkoutMoment = moment(checkoutDate);
+        const hoursWorked = checkoutMoment.diff(checkinMoment, "hours", true); 
+
+       
+        setWorkinghours(hoursWorked.toFixed(2)); 
+      } else {
+        throw new Error("Invalid date returned by the server");
+      }
+    } catch (error) {
+      console.error("Error during check-out:", error);
+      alert("Failed to check out. Please try again.");
+    }
   };
 
   const currentEmployee = employees.find((employee) => employee.email === loggedInEmail);
 
-  const handleOpenLeaveModal = () => {
-    setLeaveModalOpen(true);
-  };
-
-  const handleCloseLeaveModal = () => {
-    setLeaveModalOpen(false);
-  };
-
-  
   return (
-    <Box sx={{ display: "flex", height: "100vh", boxShadow: 54, marginTop: "8%" }}>
-      <Box sx={{ flexGrow: 1 }}>
-        <Header
-          currentEmployee={currentEmployee}
-          loginTime={loginTime}
-          logoutTime={logoutTime}
-          workingHours={workingHours}
-        />
-        <Container sx={{ mt: 4 }}>
-          <Grid container spacing={4}>
-            <Grid item xs={12} sm={6} md={4}>
-              <ClockWithCalendar />
-            </Grid>
-            
-            <Grid item xs={12}>
-            <Button
-  variant="contained"
-  onClick={handleOpenLeaveModal}
-  sx={{
-    width: "20%",
-    marginTop:"-13%",
-    padding: "12px 20px",
-    textTransform: "none",
-    fontSize: "1rem",
-    fontWeight: "bold",
-    color: "#ffffff", 
-    backgroundColor: "#006666",
-    borderRadius: 8, 
-    boxShadow: "0px 4px 12px #004d4d", 
-    transition: "all 0.3s ease", 
-    "&:hover": {
-      backgroundColor: "#004d4d",
-      boxShadow: "0px 6px 16px rgba(0, 77, 77, 0.8)", 
-      transform: "scale(1.05)",
-    },
-    "&:active": {
-      transform: "scale(0.97)", 
-    },
-  }}
->
-  Apply for Leave
-         </Button>
-
-
-            </Grid>
-          </Grid>
-        </Container>
-
-        <Modal open={leaveModalOpen} onClose={handleCloseLeaveModal}>
+    <>
+      <Modal
+        open={openPopover}
+        onClose={() => {}}
+        closeAfterTransition
+        BackdropComponent={Backdrop}
+        BackdropProps={{
+          timeout: 500,
+        }}
+      >
+        <Fade in={openPopover}>
           <Box
             sx={{
               position: "absolute",
-              marginTop: "28%",
-              marginLeft: "70%",
+              top: "50%",
+              left: "50%",
               transform: "translate(-50%, -50%)",
-              bgcolor: "white",
+              width: { xs: "90%", sm: 400 }, 
+              bgcolor: "background.paper",
               boxShadow: 24,
-              p: 2,
+              p: 4,
               borderRadius: 2,
-              maxWidth: 600,
-              width: "100%",
-              height: "100vh",
+              textAlign: "center",
             }}
           >
-            <LeaveApplicationForm onClose={handleCloseLeaveModal} />
+            <Typography
+              variant="h5"
+              component="h2"
+              sx={{
+                mb: 3,
+                color: "#ff5722",
+                fontWeight: 300,
+                fontSize: { xs: "18px", sm: "21px" }, 
+                textAlign: "center",
+                textShadow: "1px 1px 4px rgba(0, 0, 0, 0.15)",
+              }}
+            >
+              Welcome! Please check in for today
+            </Typography>
+            <Button
+              variant="contained"
+              onClick={handleCheckIn}
+              sx={{
+                backgroundColor: "#006666",
+                color: "#fff",
+                fontWeight: 600,
+                padding: "12px 28px",
+                borderRadius: "50px",
+                fontSize: "1.1rem",
+                textTransform: "uppercase",
+                transition: "all 0.2s ease-in-out",
+                "&:hover": {
+                  backgroundColor: "#006666",
+                  transform: "translateY(-2px)",
+                },
+                "&:active": {
+                  backgroundColor: "#006666",
+                  transform: "translateY(1px)",
+                },
+              }}
+            >
+              Check In
+            </Button>
           </Box>
-        </Modal>
+        </Fade>
+      </Modal>
 
-       
+      {!openPopover && (
+        <Box
+          sx={{
+            display: "flex",
+            height: "100vh",
+            boxShadow: 54,
+            marginTop: { xs: "5%", sm: "15%" }, 
+          }}
+        >
+          <Box sx={{ flexGrow: 1 }}>
+            <Header
+              currentEmployee={currentEmployee}
+              checkintime={checkintime}
+              checkouttime={checkouttime}
+              workinghours={workinghours}
+              handleCheckOut={handleCheckOut}
+              checkedIn={checkedIn}
+            />
+            <NavLink to='/checkindashboard'>
+              <Button sx={{ marginTop: 2 }}>Attendance</Button>
+            </NavLink>
+          </Box>
+        </Box>
+      )}
+    </>
+  );
+};
+
+const Header = ({
+  currentEmployee,
+  checkintime,
+  checkouttime,
+  workinghours,
+  handleCheckOut,
+  checkedIn,
+}) => {
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: { xs: "column", sm: "row" }, 
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: { xs: 2, sm: 3 },
+      }}
+    >
+      <Typography
+        variant="h4"
+        sx={{
+          fontSize: { xs: "1.5rem", sm: "2rem" }, 
+          fontWeight: 700,
+          color: "#006666",
+          textShadow: "1px 1px 5px rgba(0, 0, 0, 0.3)",
+          textAlign: { xs: "left", sm: "center" },
+          marginTop:{xs:"15%",sm:"1%"}
+        }}
+      >
+        👋 Welcome, {currentEmployee?.name || "Employee"}
+      </Typography>
+
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          padding: 3,
+          backgroundColor: "rgba(255, 255, 255, 0.8)",
+          borderRadius: 3,
+          boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
+          textAlign: "start",
+          marginRight: { xs: "5%", sm: "10%" },
+          mt: { xs: 2, sm: 0 }, 
+          width: { xs: "100%", sm: "auto" }, 
+        }}
+      >
+        <Typography
+          variant="body1"
+          sx={{
+            color: "#ff5722",
+            fontWeight: 600,
+            marginBottom: "0.5rem",
+          }}
+        >
+          🔓 Check-in Time: {checkintime ? checkintime.toLocaleTimeString() : "N/A"}
+        </Typography>
+        <Typography
+          variant="body1"
+          sx={{
+            color: "#3f51b5",
+            fontWeight: 600,
+            marginBottom: "0.5rem",
+          }}
+        >
+          🔒 Check-out Time: {checkouttime ? checkouttime.toLocaleTimeString() : "N/A"}
+        </Typography>
+        <Typography
+          variant="body1"
+          sx={{
+            color: "#4caf50",
+            fontWeight: 600,
+          }}
+        >
+          ⏱ Working Hours: {workinghours || "N/A"}
+        </Typography>
+
+        {checkedIn && (
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={handleCheckOut}
+            sx={{ marginTop: "1rem" }}
+          >
+            Check Out
+          </Button>
+        )}
       </Box>
     </Box>
   );
 };
-
-const Header = ({ currentEmployee, loginTime, logoutTime, workingHours }) => {
-  return (
-    <Box
-    sx={{
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-      padding: 3,
-  
-    
-    }}
-  >
-    <Typography
-      variant="h4"
-      sx={{
-        fontSize: "2rem",
-        fontWeight: 700,
-        color: "#006666", 
-        textShadow: "1px 1px 5px rgba(0, 0, 0, 0.3)", 
-        marginLeft:"10%"
-      }}
-    >
-      👋 Welcome, {currentEmployee?.name || "Employee"}
-    </Typography>
-  
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        padding: 2,
-        backgroundColor: "rgba(255, 255, 255, 0.8)", 
-        borderRadius: 3,
-        boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)", 
-        textAlign:"start",
-        marginRight:"10%"
-      }}
-    >
-      <Typography
-        variant="body1"
-        sx={{
-          color: "#ff5722", // Bright orange for labels
-          fontWeight: 600,
-          marginBottom: "0.5rem",
-        }}
-      >
-        🔓 Last Login: {loginTime ? loginTime.toLocaleString() : "N/A"}
-      </Typography>
-      <Typography
-        variant="body1"
-        sx={{
-          color: "#3f51b5", 
-          fontWeight: 600,
-          marginBottom: "0.5rem",
-        }}
-      >
-        🔒 Last Logout: {logoutTime ? logoutTime.toLocaleString() : "N/A"}
-      </Typography>
-      <Typography
-        variant="body1"
-        sx={{
-          color: "#4caf50", 
-          fontWeight: 600,
-        }}
-      >
-        ⏱️ Working Hours: {workingHours || "N/A"}
-      </Typography>
-    </Box>
-  </Box>
-  
-  
-  );
-};
-
-const ClockWithCalendar = () => {
-  const [time, setTime] = useState(new Date());
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-  useEffect(() => {
-    const timer = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-  const handleCalendarOpen = () => {
-    setIsCalendarOpen(true);
-  };
-  const handleCalendarClose = () => {
-    setIsCalendarOpen(false);
-  };
-  return (
-    <Box
-      sx={{
-        bgcolor: "white",
-        p: 2,
-        borderRadius: 1,
-        boxShadow: 1,
-        display: "flex",
-        alignItems: "center",
-        marginLeft:"20%"
-      }}
-    >
-      <Typography variant="h6" sx={{ display: "flex", alignItems: "center" }}>
-        <AccessTime sx={{ verticalAlign: "middle", mr: 1 }} />
-        {time.toLocaleTimeString()}
-      </Typography>
-      <IconButton color="primary" onClick={handleCalendarOpen} sx={{ ml: 2 }}>
-        <CalendarToday />
-      </IconButton>
-      <Modal open={isCalendarOpen} onClose={handleCalendarClose}>
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            bgcolor: "white",
-            boxShadow: 24,
-            p: 4,
-            borderRadius: 1,
-          }}
-        >
-          <Typography variant="h6" sx={{ mb: 2 }}>
-            Calendar
-          </Typography>
-          <Calendar value={time} />
-        </Box>
-      </Modal>
-    </Box>
-  );
-};
-
 
 export default EmployeeDashboard;
