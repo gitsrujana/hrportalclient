@@ -123,7 +123,7 @@ const Addemployee = () => {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        marginTop: "5%",
+        marginTop:isMobile?"5%": "5%",
         backgroundSize: "cover",
         backgroundPosition: "center",
         boxShadow: 54,
@@ -133,10 +133,12 @@ const Addemployee = () => {
         sx={{
           width: "100%",
           maxWidth: isMobile ? "95%" : "700px",
+          height:isMobile?"159vh":"auto",
           boxShadow: 3,
           p: isMobile ? 2 : 3,
           borderRadius: 2,
           backgroundColor: "white",
+          marginTop:isMobile?"10%": "1%",
         }}
       >
         <Typography
@@ -144,7 +146,7 @@ const Addemployee = () => {
             textAlign: "center",
             fontWeight: "bold",
             fontSize: isMobile ? "16px" : "18px",
-            mb: 2,
+         
           }}
         >
           Add Employee
@@ -295,7 +297,7 @@ const Addemployee = () => {
           </TextField>
 
           <Typography sx={{ textAlign: "start", fontWeight: "bold" }}>
-            Upload Profile Picture (Optional)
+            Upload Profile Picture 
           </Typography>
           <Stack direction={isMobile ? "column" : "row"} spacing={1}>
             <input
@@ -311,11 +313,11 @@ const Addemployee = () => {
                 variant="contained"
                 component="span"
                 sx={{
-                  backgroundColor: "#ff6f00",
-                  marginTop: "5%",
+                  backgroundColor: "#006666",
+                  marginTop:isMobile?"2%": "7%",
                   color: "#fff",
                   textTransform: "none",
-                  "&:hover": { backgroundColor: "#00c853" },
+                  "&:hover": { backgroundColor: "#006666" },
                 }}
               >
                 Choose File
@@ -341,14 +343,14 @@ const Addemployee = () => {
             type="submit"
             variant="contained"
             sx={{
-              background: "linear-gradient(135deg, #00c853, #ff6f00, #ff6f00)",
+              background: "#006666",
               color: "#fff",
               textTransform: "none",
               fontSize: "16px",
               fontWeight: "bold",
               borderRadius: "8px",
-              marginTop: "2%",
-              "&:hover": { background: "linear-gradient(135deg, #ff6f00, #00c853)" },
+              marginTop: isMobile?"5%":"2%",
+              "&:hover": { background: "#006666" },
             }}
             disabled={loading}
           >

@@ -4,7 +4,8 @@ import { useTheme } from '@mui/material/styles';
 import PeopleIcon from '@mui/icons-material/People';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import { useNavigate } from 'react-router-dom';
-import Admin from './Admin';
+
+import Sidebar from './Sidebar';
 
 const Dashboard = () => {
   const theme = useTheme();
@@ -18,7 +19,7 @@ const Dashboard = () => {
 
   return (
     <>
-       <Admin />
+       <Sidebar />
 
     <Box
       sx={{
@@ -67,7 +68,7 @@ const Dashboard = () => {
           </Card>
         </Grid>
 
-        {/* Attendance Management Card */}
+        
         <Grid item xs={12} sm={6} md={4}>
           <Card
              sx={{

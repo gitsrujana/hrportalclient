@@ -16,15 +16,14 @@ import {
   Snackbar,
   IconButton,
   Tooltip,
-  useMediaQuery,
 } from "@mui/material";
-import { styled } from "@mui/system";
+import { styled, useMediaQuery } from "@mui/system";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Alert } from "@mui/lab";
 import { useTheme } from "@mui/material/styles";
-
-import Admin from "./Admin";
+import Sidebar from "./Sidebar";
+import EmployeeAttendanceDetails from './EmployeeAttendanceDetails ';
 
 const Header = styled(Box)(() => ({
   backgroundColor: "#006666",
@@ -36,18 +35,20 @@ const Header = styled(Box)(() => ({
 
 const EmployeeManagement = () => {
   const theme = useTheme();
- const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
 
-
   const [employees, setEmployees] = useState([]);
+  const [attendanceData, setAttendanceData] = useState([]); // Store all attendance data
   const [editingEmployee, setEditingEmployee] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
+  const [selectedEmployeeEmail, setSelectedEmployeeEmail] = useState(null); // For showing modal
 
   useEffect(() => {
     fetchEmployees();
+    fetchAttendanceData(); // Fetch attendance data as well
   }, []);
 
   const fetchEmployees = async () => {
@@ -62,12 +63,19 @@ const EmployeeManagement = () => {
     }
   };
 
+  const fetchAttendanceData = async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/v1/api/attendance/get");
+      setAttendanceData(response.data);
+    } catch (error) {
+      setError("Failed to fetch attendance data. Please try again.");
+    }
+  };
+
   const handleDelete = async (email) => {
     if (window.confirm("Are you sure you want to delete this employee?")) {
       try {
-        const response = await axios.delete(
-          `http://localhost:5000/v1/api/employees/delete/${email}`
-        );
+        const response = await axios.delete(`http://localhost:5000/v1/api/employees/delete/${email}`);
         if (response.status === 200) {
           setEmployees(employees.filter((employee) => employee.email !== email));
           alert("Employee deleted successfully!");
@@ -88,12 +96,8 @@ const EmployeeManagement = () => {
 
   const handleUpdate = async (updatedEmployee) => {
     try {
-      console.log("Updated Employee Data:", updatedEmployee);
       const { email, ...updatePayload } = updatedEmployee;
-      const response = await axios.put(
-        `http://localhost:5000/v1/api/employees/update/${email}`,
-        { ...updatePayload, email }
-      );
+      const response = await axios.put(`http://localhost:5000/v1/api/employees/update/${email}`, { ...updatePayload, email });
       setEmployees((prevEmployees) =>
         prevEmployees.map((employee) =>
           employee.email === updatedEmployee.email ? response.data : employee
@@ -106,9 +110,17 @@ const EmployeeManagement = () => {
     }
   };
 
+  const handleEmailClick = (email) => {
+    setSelectedEmployeeEmail(email); // Set the selected employee email to show the attendance details
+  };
+
+  const handleCloseModal = () => {
+    setSelectedEmployeeEmail(null); // Close the modal by resetting the email
+  };
+
   return (
     <>
-      <Admin />
+      <Sidebar />
       <Box
         sx={{
           p: isMobile ? 0 : 3,
@@ -116,11 +128,9 @@ const EmployeeManagement = () => {
           width: isMobile ? "95%" : "80%",
           ml: isMobile ? "2%" : "18%",
           marginTop: "5%",
-          height: isMobile ? 'auto' : isTablet ? 'auto' : 'auto',
         }}
       >
         <Typography
-         
           sx={{
             backgroundColor: "#006666",
             color: "#fff",
@@ -128,7 +138,7 @@ const EmployeeManagement = () => {
             textAlign: "center",
             borderRadius: "8px 8px 0 0",
             marginTop: "5%",
-                fontSize:isMobile?" ":"18px"
+            fontSize: isMobile ? "16px" : "18px",
           }}
         >
           Manage Employees
@@ -143,14 +153,14 @@ const EmployeeManagement = () => {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{fontWeight:"bold"}}>Name</TableCell>
-                  <TableCell sx={{fontWeight:"bold"}}>Image</TableCell>
-                  <TableCell sx={{fontWeight:"bold"}}>Email</TableCell>
-                  <TableCell sx={{fontWeight:"bold"}}>Contact Number</TableCell>
-                  <TableCell sx={{fontWeight:"bold"}}>Address</TableCell>
-                  <TableCell sx={{fontWeight:"bold"}}>Salary</TableCell>
-                  <TableCell sx={{fontWeight:"bold"}}>Category</TableCell>
-                  <TableCell sx={{fontWeight:"bold"}}>Action</TableCell>
+                  <TableCell sx={{ fontWeight: "bold" }}>Name</TableCell>
+                  <TableCell sx={{ fontWeight: "bold" }}>Image</TableCell>
+                  <TableCell sx={{ fontWeight: "bold" }}>Email</TableCell>
+                  <TableCell sx={{ fontWeight: "bold" }}>Contact Number</TableCell>
+                  <TableCell sx={{ fontWeight: "bold" }}>Address</TableCell>
+                  <TableCell sx={{ fontWeight: "bold" }}>Salary</TableCell>
+                  <TableCell sx={{ fontWeight: "bold" }}>Category</TableCell>
+                  <TableCell sx={{ fontWeight: "bold" }}>Action</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -172,7 +182,11 @@ const EmployeeManagement = () => {
                         "N/A"
                       )}
                     </TableCell>
-                    <TableCell>{employee.email}</TableCell>
+                    <TableCell onClick={() => handleEmailClick(employee.email)} sx={{ textDecoration: 'none' }}>
+                     
+                        {employee.email}
+                   
+                    </TableCell>
                     <TableCell>{employee.contactnumber}</TableCell>
                     <TableCell>{employee.address}</TableCell>
                     <TableCell>{employee.salary}</TableCell>
@@ -203,109 +217,15 @@ const EmployeeManagement = () => {
           </TableContainer>
         )}
 
-        <Snackbar
-          open={!!successMessage}
-          autoHideDuration={6000}
-          onClose={() => setSuccessMessage(null)}
-        >
-          <Alert
-            onClose={() => setSuccessMessage(null)}
-            severity="success"
-            sx={{ width: "100%" }}
-          >
-            {successMessage}
-          </Alert>
-        </Snackbar>
-
-        <Snackbar
-          open={!!error}
-          autoHideDuration={6000}
-          onClose={() => setError(null)}
-        >
-          <Alert
-            onClose={() => setError(null)}
-            severity="error"
-            sx={{ width: "100%" }}
-          >
-            {error}
-          </Alert>
-        </Snackbar>
-
-        {editingEmployee && (
-          <Box sx={{ p: 3, mt: 3, width: "100%", backgroundColor: "white" }}>
-            <Typography variant="h6" sx={{ mt: 3 }}>
-              Edit Employee
-            </Typography>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleUpdate(editingEmployee);
-              }}
-            >
-              <TextField
-                label="Name"
-                value={editingEmployee.name}
-                onChange={(e) =>
-                  setEditingEmployee({ ...editingEmployee, name: e.target.value })
-                }
-                fullWidth
-                margin="normal"
-              />
-              <TextField
-                label="Email"
-                value={editingEmployee.email}
-                onChange={(e) =>
-                  setEditingEmployee({ ...editingEmployee, email: e.target.value })
-                }
-                fullWidth
-                margin="normal"
-              />
-              <TextField
-                label="Contact Number"
-                value={editingEmployee.contactnumber}
-                onChange={(e) =>
-                  setEditingEmployee({
-                    ...editingEmployee,
-                    contactnumber: e.target.value,
-                  })
-                }
-                fullWidth
-                margin="normal"
-              />
-              <TextField
-                label="Address"
-                value={editingEmployee.address}
-                onChange={(e) =>
-                  setEditingEmployee({ ...editingEmployee, address: e.target.value })
-                }
-                fullWidth
-                margin="normal"
-              />
-              <TextField
-                label="Salary"
-                value={editingEmployee.salary}
-                onChange={(e) =>
-                  setEditingEmployee({ ...editingEmployee, salary: e.target.value })
-                }
-                fullWidth
-                margin="normal"
-              />
-              <TextField
-                label="Category"
-                value={editingEmployee.category}
-                onChange={(e) =>
-                  setEditingEmployee({ ...editingEmployee, category: e.target.value })
-                }
-                fullWidth
-                margin="normal"
-              />
-
-              <Button type="submit" variant="contained" color="primary">
-                Save
-              </Button>
-            </form>
-          </Box>
+        {selectedEmployeeEmail && (
+          <EmployeeAttendanceDetails
+            email={selectedEmployeeEmail}
+            attendanceData={attendanceData}
+            onClose={handleCloseModal}
+          />
         )}
+
+        {/* Snackbar for success and error */}
       </Box>
     </>
   );

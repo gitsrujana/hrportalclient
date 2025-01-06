@@ -131,6 +131,10 @@ const LoginForm = () => {
             Login
           </Typography>
           <form onSubmit={handleSubmit(onSubmit)}>
+            
+                      <Typography sx={{ textAlign: "start", fontWeight: "bold" }}>
+                        Email
+                      </Typography>
             <Controller
               name="email"
               control={control}
@@ -145,7 +149,7 @@ const LoginForm = () => {
               render={({ field }) => (
                 <TextField
                   {...field}
-                  label="Email"
+               
                   fullWidth
                   margin="normal"
                   variant="outlined"
@@ -154,7 +158,10 @@ const LoginForm = () => {
                 />
               )}
             />
-
+          
+                    <Typography sx={{ textAlign: "start", fontWeight: "bold" }}>
+                    Password
+                    </Typography>
             <Controller
               name="password"
               control={control}
@@ -169,7 +176,7 @@ const LoginForm = () => {
               render={({ field }) => (
                 <TextField
                   {...field}
-                  label="Password"
+              
                   fullWidth
                   margin="normal"
                   variant="outlined"
@@ -190,7 +197,7 @@ const LoginForm = () => {
             />
 
             <FormControlLabel
-              control={<Checkbox color="primary" />}
+              control={<Checkbox color="primary"  sx={{marginLeft:"-27%"}}/>}
               label="You agree with Terms & Conditions"
               sx={{ mt: 1 }}
             />
@@ -200,9 +207,9 @@ const LoginForm = () => {
               fullWidth
               variant="contained"
               sx={{
-                background: "linear-gradient(135deg, #00c853, #ff6f00)",
+                background: "#006666",
                 "&:hover": {
-                  background: "linear-gradient(135deg, #ff6f00, #00c853)",
+                  background: "#006666",
                 },
                 textTransform: "none",
                 mb: 2,
@@ -213,9 +220,10 @@ const LoginForm = () => {
             </Button>
 
             <Button
+            sx={{textTransform:"none",color:"black"}}
               fullWidth
-              variant="outlined"
-              color="secondary"
+           
+            
               onClick={handleLoginWithOtpClick}
             >
               Login with OTP
@@ -244,9 +252,9 @@ const LoginForm = () => {
                 fullWidth
                 onClick={handleVerifyOtp}
                 sx={{
-                  background: "linear-gradient(135deg, #ff6f00, #00c853)",
+                  background: "#006666",
                   "&:hover": {
-                    background: "linear-gradient(135deg, #ff6f00, #00c853)",
+                    background: "#006666",
                   },
                 }}
               >
@@ -255,8 +263,9 @@ const LoginForm = () => {
             </Box>
           </Popover>
 
-          <Typography align="center">
+          <Typography  sx={{textTransform:"none",textAlign:"start"}}>
             <Link
+
               href="#"
               underline="hover"
               color="primary"
