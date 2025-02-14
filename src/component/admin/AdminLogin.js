@@ -1,12 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   TextField,
   Button,
   Box,
   Typography,
-  Checkbox,
   FormControlLabel,
-  Link,
+  Checkbox,
   InputAdornment,
   IconButton,
   Popover,
@@ -16,13 +15,14 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useForm, Controller } from "react-hook-form";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "./AuthProvider ";
+import { useAuth } from "../AuthProvider ";
 import { useTheme } from "@mui/material/styles";
 import { useMediaQuery } from "@mui/material";
-const Login = () => {
+
+const AdminLogin = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
+  const [adminEmail, setAdminEmail] = useState("");
   const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [otp, setOtp] = useState("");
@@ -42,7 +42,7 @@ const Login = () => {
     try {
       setLoading(true);
       const response = await axios.post(
-        "http://localhost:5000/v1/api/employees/login",
+        "http://localhost:5000/v1/api/admin/login",
         { email: data.email, password: data.password }
       );
 
@@ -50,7 +50,7 @@ const Login = () => {
       const message = response.data.message;
       alert(message);
       login();
-      navigate("/employeedashboard");
+      navigate("/dashboard"); 
     } catch (error) {
       console.error("Login Error:", error.response?.data || error.message);
       alert(
@@ -61,19 +61,38 @@ const Login = () => {
     }
   };
 
-  const handleSendOtp = async (data) => {
+  useEffect(() => {
+    const fetchAdminEmail = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:5000/v1/api/admin/email"
+        );
+        setAdminEmail(response.data.email); 
+      } catch (error) {
+        console.error(
+          "Error fetching admin email:",
+          error.response?.data || error.message
+        );
+        alert("Failed to fetch admin email.");
+      }
+    };
+
+    fetchAdminEmail();
+  }, []);
+
+  const handleSendOtp = async () => {
     const email = getValues("email");
-    if (!email) {
-      alert("Please enter your email to receive OTP.");
+
+    if (email !== adminEmail) {
+      alert("OTP is only sent to the admin email.");
       return;
     }
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/v1/api/employees/otp/send",
+        "http://localhost:5000/v1/api/admin/send",
         { email }
       );
-      localStorage.setItem("loggedInEmail", data.email);
       alert(response.data.message || "OTP sent successfully!");
       setOtpSent(true);
       setOtpAnchorEl(true);
@@ -95,7 +114,7 @@ const Login = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/v1/api/employees/otp/verify",
+        "http://localhost:5000/v1/api/admin/verify",
         {
           email,
           otp,
@@ -105,7 +124,7 @@ const Login = () => {
       setOtpSent(false);
       setOtpAnchorEl(null);
       login();
-      navigate("/employeedashboard");
+      navigate("/dashboard");
     } catch (error) {
       console.error("Verify OTP Error:", error.response?.data || error.message);
       alert(
@@ -146,7 +165,7 @@ const Login = () => {
           }}
         >
           <Typography variant="h5" align="center" mb={2}>
-            Login
+            Admin Login
           </Typography>
           <form onSubmit={handleSubmit(onSubmit)}>
             <Typography sx={{ textAlign: "start", fontWeight: "bold" }}>
@@ -174,7 +193,6 @@ const Login = () => {
                 />
               )}
             />
-
             <Typography sx={{ textAlign: "start", fontWeight: "bold" }}>
               Password
             </Typography>
@@ -291,4 +309,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default AdminLogin;

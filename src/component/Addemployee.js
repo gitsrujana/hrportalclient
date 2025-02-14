@@ -15,7 +15,6 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 
 const Addemployee = () => {
-  const [profilePictureUrl, setProfilePictureUrl] = useState('');
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -25,12 +24,10 @@ const Addemployee = () => {
     salary: "",
     address: "",
     category: "",
-    profilePictureUrl: profilePictureUrl || null,  
   });
-  const [file, setFile] = useState(null);
-  const [fileName, setFileName] = useState("");
+
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showconfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const isMobile = useMediaQuery("(max-width:600px)");
   const navigate = useNavigate();
@@ -48,38 +45,6 @@ const Addemployee = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // const handleFileChange = async (event) => {
-  //   const file = event.target.files[0];
-  //   if (!file) {
-  //     setFile(null);
-  //     setFileName('');
-  //     return;
-  //   }
-
-  //   setFile(file);
-  //   setFileName(file.name);
-
-  //   try {
-  //     const response = await axios.get("http://localhost:5000/v1/api/presigned-url/presigned-url", {
-  //       params: { filepath: `profilePictures/${file.name}` },
-  //     });
-
-  //     const preSignedUrl = response.data.url;
-
-  //     await axios.put(preSignedUrl, file, {
-  //       headers: { "Content-Type": file.type },
-  //     });
-
-  //     const publicUrl = preSignedUrl.split("?")[0];
-  //     setFormData((prev) => ({ ...prev, profilePictureUrl: publicUrl }));
-  //     alert("File uploaded successfully!");
-  //   } catch (error) {
-  //     console.error("Error uploading the file:", error);
-  //     alert("Failed to upload the file.");
-  //     setFileName("");
-  //   }
-  // };
-
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -88,16 +53,11 @@ const Addemployee = () => {
       return;
     }
 
-    // if (!file && !formData.profilePictureUrl) {
-    //   alert("Please upload a profile picture or leave it empty.");
-    //   return;
-    // }
-
     setLoading(true);
     try {
       const response = await axios.post(
         "http://localhost:5000/v1/api/employees/add",
-        formData, 
+        formData,
         {
           headers: { "Content-Type": "application/json" },
         }
@@ -105,7 +65,7 @@ const Addemployee = () => {
 
       console.log("Response:", response.data);
       alert("Employee added successfully!");
-      navigate("/employeelist");
+      navigate("/employeemanagement");
     } catch (error) {
       console.error("Error submitting the form:", error);
       alert("Failed to add employee. Please try again.");
@@ -123,7 +83,7 @@ const Addemployee = () => {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        marginTop:isMobile?"5%": "5%",
+        marginTop: isMobile ? "5%" : "5%",
         backgroundSize: "cover",
         backgroundPosition: "center",
         boxShadow: 54,
@@ -133,12 +93,12 @@ const Addemployee = () => {
         sx={{
           width: "100%",
           maxWidth: isMobile ? "95%" : "700px",
-          height:isMobile?"159vh":"auto",
+          height: isMobile ? "159vh" : "auto",
           boxShadow: 3,
           p: isMobile ? 2 : 3,
           borderRadius: 2,
           backgroundColor: "white",
-          marginTop:isMobile?"10%": "1%",
+          marginTop: isMobile ? "10%" : "1%",
         }}
       >
         <Typography
@@ -146,7 +106,6 @@ const Addemployee = () => {
             textAlign: "center",
             fontWeight: "bold",
             fontSize: isMobile ? "16px" : "18px",
-         
           }}
         >
           Add Employee
@@ -215,7 +174,7 @@ const Addemployee = () => {
           <TextField
             fullWidth
             margin="normal"
-            type={showConfirmPassword ? "text" : "password"}
+            type={showconfirmPassword ? "text" : "password"}
             variant="outlined"
             required
             placeholder="Confirm password"
@@ -230,7 +189,7 @@ const Addemployee = () => {
                     onClick={handleClickShowConfirmPassword}
                     edge="end"
                   >
-                    {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                    {showconfirmPassword ? <VisibilityOff /> : <Visibility />}
                   </IconButton>
                 </InputAdornment>
               ),
@@ -296,49 +255,6 @@ const Addemployee = () => {
             <MenuItem value="Developer">Developer</MenuItem>
           </TextField>
 
-          <Typography sx={{ textAlign: "start", fontWeight: "bold" }}>
-            Upload Profile Picture 
-          </Typography>
-          <Stack direction={isMobile ? "column" : "row"} spacing={1}>
-            <input
-              accept="image/*"
-              type="file"
-              name="profilePicture"
-              id="file-upload"
-              style={{ display: "none" }}
-              // onChange={handleFileChange}
-            />
-            <label htmlFor="file-upload">
-              <Button
-                variant="contained"
-                component="span"
-                sx={{
-                  backgroundColor: "#006666",
-                  marginTop:isMobile?"2%": "7%",
-                  color: "#fff",
-                  textTransform: "none",
-                  "&:hover": { backgroundColor: "#006666" },
-                }}
-              >
-                Choose File
-              </Button>
-            </label>
-            {fileName && (
-              <Typography
-                variant="body2"
-                sx={{
-                  marginTop: isMobile ? "8px" : "16px",
-                  color: "#555",
-                  textAlign: isMobile ? "start" : "center",
-                  wordWrap: "break-word",
-                }}
-              >
-                Selected File: <strong>{fileName}</strong>
-              </Typography>
-            )}
-          </Stack>
-          <br />
-
           <Button
             type="submit"
             variant="contained"
@@ -349,7 +265,7 @@ const Addemployee = () => {
               fontSize: "16px",
               fontWeight: "bold",
               borderRadius: "8px",
-              marginTop: isMobile?"5%":"2%",
+              marginTop: isMobile ? "5%" : "2%",
               "&:hover": { background: "#006666" },
             }}
             disabled={loading}

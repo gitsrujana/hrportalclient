@@ -23,7 +23,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { Alert } from "@mui/lab";
 import { useTheme } from "@mui/material/styles";
 import Sidebar from "./Sidebar";
-import EmployeeAttendanceDetails from './EmployeeAttendanceDetails ';
+import EmployeeAttendanceDetails from "./EmployeeAttendanceDetails ";
 
 const Header = styled(Box)(() => ({
   backgroundColor: "#006666",
@@ -35,26 +35,28 @@ const Header = styled(Box)(() => ({
 
 const EmployeeManagement = () => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
 
   const [employees, setEmployees] = useState([]);
-  const [attendanceData, setAttendanceData] = useState([]); // Store all attendance data
+  const [attendanceData, setAttendanceData] = useState([]);
   const [editingEmployee, setEditingEmployee] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
-  const [selectedEmployeeEmail, setSelectedEmployeeEmail] = useState(null); // For showing modal
+  const [selectedEmployeeEmail, setSelectedEmployeeEmail] = useState(null);
 
   useEffect(() => {
     fetchEmployees();
-    fetchAttendanceData(); // Fetch attendance data as well
+    fetchAttendanceData();
   }, []);
 
   const fetchEmployees = async () => {
     setLoading(true);
     try {
-      const response = await axios.get("http://localhost:5000/v1/api/employees/get");
+      const response = await axios.get(
+        "http://localhost:5000/v1/api/employees/get"
+      );
       setEmployees(response.data);
     } catch (error) {
       setError("Failed to fetch employees. Please try again.");
@@ -65,7 +67,9 @@ const EmployeeManagement = () => {
 
   const fetchAttendanceData = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/v1/api/attendance/get");
+      const response = await axios.get(
+        "http://localhost:5000/v1/api/attendance/get"
+      );
       setAttendanceData(response.data);
     } catch (error) {
       setError("Failed to fetch attendance data. Please try again.");
@@ -75,9 +79,13 @@ const EmployeeManagement = () => {
   const handleDelete = async (email) => {
     if (window.confirm("Are you sure you want to delete this employee?")) {
       try {
-        const response = await axios.delete(`http://localhost:5000/v1/api/employees/delete/${email}`);
+        const response = await axios.delete(
+          `http://localhost:5000/v1/api/employees/delete/${email}`
+        );
         if (response.status === 200) {
-          setEmployees(employees.filter((employee) => employee.email !== email));
+          setEmployees(
+            employees.filter((employee) => employee.email !== email)
+          );
           alert("Employee deleted successfully!");
         } else {
           alert("Failed to delete the employee.");
@@ -97,7 +105,10 @@ const EmployeeManagement = () => {
   const handleUpdate = async (updatedEmployee) => {
     try {
       const { email, ...updatePayload } = updatedEmployee;
-      const response = await axios.put(`http://localhost:5000/v1/api/employees/update/${email}`, { ...updatePayload, email });
+      const response = await axios.put(
+        `http://localhost:5000/v1/api/employees/update/${email}`,
+        { ...updatePayload, email }
+      );
       setEmployees((prevEmployees) =>
         prevEmployees.map((employee) =>
           employee.email === updatedEmployee.email ? response.data : employee
@@ -111,11 +122,11 @@ const EmployeeManagement = () => {
   };
 
   const handleEmailClick = (email) => {
-    setSelectedEmployeeEmail(email); // Set the selected employee email to show the attendance details
+    setSelectedEmployeeEmail(email);
   };
 
   const handleCloseModal = () => {
-    setSelectedEmployeeEmail(null); // Close the modal by resetting the email
+    setSelectedEmployeeEmail(null);
   };
 
   return (
@@ -154,9 +165,11 @@ const EmployeeManagement = () => {
               <TableHead>
                 <TableRow>
                   <TableCell sx={{ fontWeight: "bold" }}>Name</TableCell>
-                  <TableCell sx={{ fontWeight: "bold" }}>Image</TableCell>
+
                   <TableCell sx={{ fontWeight: "bold" }}>Email</TableCell>
-                  <TableCell sx={{ fontWeight: "bold" }}>Contact Number</TableCell>
+                  <TableCell sx={{ fontWeight: "bold" }}>
+                    Contact Number
+                  </TableCell>
                   <TableCell sx={{ fontWeight: "bold" }}>Address</TableCell>
                   <TableCell sx={{ fontWeight: "bold" }}>Salary</TableCell>
                   <TableCell sx={{ fontWeight: "bold" }}>Category</TableCell>
@@ -167,25 +180,12 @@ const EmployeeManagement = () => {
                 {employees.map((employee) => (
                   <TableRow key={employee.email}>
                     <TableCell>{employee.name}</TableCell>
-                    <TableCell>
-                      {employee.profilePicture ? (
-                        <img
-                          src={`http://localhost:5000/${employee.profilePicture}`}
-                          alt={`${employee.name}'s Profile`}
-                          style={{
-                            width: 50,
-                            height: 50,
-                            borderRadius: "50%",
-                          }}
-                        />
-                      ) : (
-                        "N/A"
-                      )}
-                    </TableCell>
-                    <TableCell onClick={() => handleEmailClick(employee.email)} sx={{ textDecoration: 'none' }}>
-                     
-                        {employee.email}
-                   
+
+                    <TableCell
+                      onClick={() => handleEmailClick(employee.email)}
+                      sx={{ textDecoration: "none" }}
+                    >
+                      {employee.email}
                     </TableCell>
                     <TableCell>{employee.contactnumber}</TableCell>
                     <TableCell>{employee.address}</TableCell>
@@ -224,8 +224,6 @@ const EmployeeManagement = () => {
             onClose={handleCloseModal}
           />
         )}
-
-        {/* Snackbar for success and error */}
       </Box>
     </>
   );

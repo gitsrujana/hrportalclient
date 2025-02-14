@@ -1,12 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  Box,
-  Typography,
-  Button,
-  Modal,
-  Backdrop,
-  Fade,
-} from "@mui/material";
+import { Box, Typography, Button, Modal, Backdrop, Fade } from "@mui/material";
 import "react-calendar/dist/Calendar.css";
 import moment from "moment";
 import { useTheme } from "@mui/material/styles";
@@ -28,7 +21,9 @@ const EmployeeDashboard = () => {
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/v1/api/employees/get");
+        const response = await axios.get(
+          "http://localhost:5000/v1/api/employees/get"
+        );
         setEmployees(response.data);
       } catch (error) {
         console.error("Error fetching employees:", error);
@@ -41,12 +36,15 @@ const EmployeeDashboard = () => {
 
   const handleCheckIn = async () => {
     try {
-      const response = await axios.post("http://localhost:5000/v1/api/attendance/checkin", {
-        email: loggedInEmail,
-      });
+      const response = await axios.post(
+        "http://localhost:5000/v1/api/attendance/checkin",
+        {
+          email: loggedInEmail,
+        }
+      );
 
       const checkinDate = moment(response.data.checkintime).toDate();
-      
+
       if (moment(checkinDate).isValid()) {
         setCheckintime(checkinDate);
         setCheckedIn(true);
@@ -62,22 +60,23 @@ const EmployeeDashboard = () => {
 
   const handleCheckOut = async () => {
     try {
-      const response = await axios.post("http://localhost:5000/v1/api/attendance/checkout", {
-        email: loggedInEmail,
-      });
+      const response = await axios.post(
+        "http://localhost:5000/v1/api/attendance/checkout",
+        {
+          email: loggedInEmail,
+        }
+      );
 
       const checkoutDate = moment(response.data.checkouttime).toDate();
       if (moment(checkoutDate).isValid()) {
         setCheckouttime(checkoutDate);
         setCheckedIn(false);
 
-       
         const checkinMoment = moment(checkintime);
         const checkoutMoment = moment(checkoutDate);
-        const hoursWorked = checkoutMoment.diff(checkinMoment, "hours", true); 
+        const hoursWorked = checkoutMoment.diff(checkinMoment, "hours", true);
 
-       
-        setWorkinghours(hoursWorked.toFixed(2)); 
+        setWorkinghours(hoursWorked.toFixed(2));
       } else {
         throw new Error("Invalid date returned by the server");
       }
@@ -87,7 +86,9 @@ const EmployeeDashboard = () => {
     }
   };
 
-  const currentEmployee = employees.find((employee) => employee.email === loggedInEmail);
+  const currentEmployee = employees.find(
+    (employee) => employee.email === loggedInEmail
+  );
 
   return (
     <>
@@ -107,7 +108,7 @@ const EmployeeDashboard = () => {
               top: "50%",
               left: "50%",
               transform: "translate(-50%, -50%)",
-              width: { xs: "90%", sm: 400 }, 
+              width: { xs: "90%", sm: 400 },
               bgcolor: "background.paper",
               boxShadow: 24,
               p: 4,
@@ -122,7 +123,7 @@ const EmployeeDashboard = () => {
                 mb: 3,
                 color: "#ff5722",
                 fontWeight: 300,
-                fontSize: { xs: "18px", sm: "21px" }, 
+                fontSize: { xs: "18px", sm: "21px" },
                 textAlign: "center",
                 textShadow: "1px 1px 4px rgba(0, 0, 0, 0.15)",
               }}
@@ -163,7 +164,7 @@ const EmployeeDashboard = () => {
             display: "flex",
             height: "100vh",
             boxShadow: 54,
-            marginTop: { xs: "5%", sm: "15%" }, 
+            marginTop: { xs: "5%", sm: "15%" },
           }}
         >
           <Box sx={{ flexGrow: 1 }}>
@@ -175,8 +176,20 @@ const EmployeeDashboard = () => {
               handleCheckOut={handleCheckOut}
               checkedIn={checkedIn}
             />
-            <NavLink to='/checkindashboard'>
-              <Button sx={{ marginTop: 2 }}>Attendance</Button>
+            <NavLink to="/checkindashboard">
+              <Button
+                sx={{
+                  marginTop: 2,
+                  marginLeft: { xs: "2%", sm: "30%", md: "50%", lg: "60%" },
+                  backgroundColor: "#006666",
+                  color: "white",
+                  padding: "8px 16px",
+                  borderRadius: "4px",
+                  "&:hover": { backgroundColor: "#006666" },
+                }}
+              >
+                Attendance
+              </Button>
             </NavLink>
           </Box>
         </Box>
@@ -197,7 +210,7 @@ const Header = ({
     <Box
       sx={{
         display: "flex",
-        flexDirection: { xs: "column", sm: "row" }, 
+        flexDirection: { xs: "column", sm: "row" },
         alignItems: "center",
         justifyContent: "space-between",
         padding: { xs: 2, sm: 3 },
@@ -206,12 +219,12 @@ const Header = ({
       <Typography
         variant="h4"
         sx={{
-          fontSize: { xs: "1.5rem", sm: "2rem" }, 
+          fontSize: { xs: "1.5rem", sm: "2rem" },
           fontWeight: 700,
           color: "#006666",
           textShadow: "1px 1px 5px rgba(0, 0, 0, 0.3)",
           textAlign: { xs: "left", sm: "center" },
-          marginTop:{xs:"15%",sm:"1%"}
+          marginTop: { xs: "15%", sm: "1%" },
         }}
       >
         👋 Welcome, {currentEmployee?.name || "Employee"}
@@ -227,8 +240,8 @@ const Header = ({
           boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
           textAlign: "start",
           marginRight: { xs: "5%", sm: "10%" },
-          mt: { xs: 2, sm: 0 }, 
-          width: { xs: "100%", sm: "auto" }, 
+          mt: { xs: 2, sm: 0 },
+          width: { xs: "100%", sm: "auto" },
         }}
       >
         <Typography
@@ -239,7 +252,8 @@ const Header = ({
             marginBottom: "0.5rem",
           }}
         >
-          🔓 Check-in Time: {checkintime ? checkintime.toLocaleTimeString() : "N/A"}
+          🔓 Check-in Time:{" "}
+          {checkintime ? checkintime.toLocaleTimeString() : "N/A"}
         </Typography>
         <Typography
           variant="body1"
@@ -249,7 +263,8 @@ const Header = ({
             marginBottom: "0.5rem",
           }}
         >
-          🔒 Check-out Time: {checkouttime ? checkouttime.toLocaleTimeString() : "N/A"}
+          🔒 Check-out Time:{" "}
+          {checkouttime ? checkouttime.toLocaleTimeString() : "N/A"}
         </Typography>
         <Typography
           variant="body1"

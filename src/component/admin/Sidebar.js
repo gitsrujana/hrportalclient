@@ -17,7 +17,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import MenuIcon from "@mui/icons-material/Menu";
-import TodayIcon from '@mui/icons-material/Today';
+import TodayIcon from "@mui/icons-material/Today";
 import { useNavigate } from "react-router-dom";
 
 const Sidebar = () => {
@@ -27,7 +27,11 @@ const Sidebar = () => {
 
   const menuItems = [
     { text: "Dashboard", icon: <DashboardIcon />, path: "/dashboard" },
-    { text: "Employee Management", icon: <GroupIcon />, path: "/employeemaagement" },
+    {
+      text: "Employee Management",
+      icon: <GroupIcon />,
+      path: "/employeemanagement",
+    },
     { text: "Category", icon: <CategoryIcon />, path: "/category" },
     { text: "Leaves", icon: <EventAvailableIcon />, path: "/leaves" },
     { text: "Salary", icon: <AttachMoneyIcon />, path: "/salary" },
@@ -40,22 +44,20 @@ const Sidebar = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex' }}>
-    
+    <Box sx={{ display: "flex" }}>
       {isMobile && (
         <IconButton
           onClick={handleToggle}
           sx={{
             marginLeft: "10px",
             marginTop: "20%",
-            color: "#006666"
+            color: "#006666",
           }}
         >
           <MenuIcon />
         </IconButton>
       )}
 
-    
       <Drawer
         variant={isMobile ? "temporary" : "permanent"}
         open={isMobile ? open : true}
@@ -90,13 +92,11 @@ const Sidebar = () => {
         sx={{
           flexGrow: 1,
           padding: "24px",
-          marginLeft: isMobile ? 0 : 240, 
-          transition: 'margin 0.3s',
+          marginLeft: isMobile ? 0 : 240,
+          transition: "margin 0.3s",
           color: "#006666",
         }}
-      >
-     
-      </Box>
+      ></Box>
     </Box>
   );
 };
