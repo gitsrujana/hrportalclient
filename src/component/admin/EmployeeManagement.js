@@ -201,6 +201,117 @@ const EmployeeManagement = () => {
                           <EditIcon />
                         </IconButton>
                       </Tooltip>
+
+                      {editingEmployee && (
+                        <Box
+                          sx={{
+                            position: "fixed",
+                            top: "50%",
+                            left: "50%",
+                            transform: "translate(-50%, -50%)",
+                            backgroundColor: "#fff",
+                            padding: { xs: 2, sm: 3 },
+                            borderRadius: 2,
+                            boxShadow: 3,
+                            zIndex: 1300,
+                            width: { xs: "90%", sm: "70%", md: "50%" },
+                            maxHeight: "90vh",
+                            overflowY: "auto",
+                          }}
+                        >
+                          <Typography variant="h6" gutterBottom>
+                            Edit Employee
+                          </Typography>
+                          <TextField
+                            label="Name"
+                            fullWidth
+                            margin="normal"
+                            value={editingEmployee.name}
+                            onChange={(e) =>
+                              setEditingEmployee({
+                                ...editingEmployee,
+                                name: e.target.value,
+                              })
+                            }
+                          />
+                          <TextField
+                            label="Contact Number"
+                            fullWidth
+                            margin="normal"
+                            value={editingEmployee.contactnumber}
+                            onChange={(e) =>
+                              setEditingEmployee({
+                                ...editingEmployee,
+                                contactnumber: e.target.value,
+                              })
+                            }
+                          />
+                          <TextField
+                            label="Address"
+                            fullWidth
+                            margin="normal"
+                            value={editingEmployee.address}
+                            onChange={(e) =>
+                              setEditingEmployee({
+                                ...editingEmployee,
+                                address: e.target.value,
+                              })
+                            }
+                          />
+                          <TextField
+                            label="Salary"
+                            fullWidth
+                            margin="normal"
+                            value={editingEmployee.salary}
+                            onChange={(e) =>
+                              setEditingEmployee({
+                                ...editingEmployee,
+                                salary: e.target.value,
+                              })
+                            }
+                          />
+                          <TextField
+                            label="Category"
+                            fullWidth
+                            margin="normal"
+                            value={editingEmployee.category}
+                            onChange={(e) =>
+                              setEditingEmployee({
+                                ...editingEmployee,
+                                category: e.target.value,
+                              })
+                            }
+                          />
+                          <Box
+                            sx={{
+                              display: "flex",
+                              flexDirection: { xs: "column", sm: "row" },
+                              justifyContent: "space-between",
+                              mt: 2,
+                              gap: 1,
+                            }}
+                          >
+                            <Button
+                              variant="contained"
+                          
+                              onClick={() => handleUpdate(editingEmployee)}
+                              
+                              sx={{backgroundColor:"#006666"}}
+                            >
+                              Save
+                            </Button>
+                            <Button
+                              variant="outlined"
+                              color="secondary"
+                              onClick={() => setEditingEmployee(null)}
+                             
+                            >
+                              Cancel
+                            </Button>
+                          </Box>
+                        </Box>
+                      )}
+
                       <Tooltip title="Delete" arrow>
                         <IconButton
                           color="error"

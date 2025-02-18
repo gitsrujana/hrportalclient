@@ -61,30 +61,38 @@ const Login = () => {
     }
   };
 
-  const handleSendOtp = async (data) => {
-    const email = getValues("email");
-    if (!email) {
-      alert("Please enter your email to receive OTP.");
-      return;
-    }
+ 
+const handleSendOtp = async (data) => {
+  const email = getValues("email");
+  if (!email) {
+    alert("Please enter your email to receive OTP.");
+    return;
+  }
 
-    try {
-      const response = await axios.post(
-        "http://localhost:5000/v1/api/employees/otp/send",
-        { email }
-      );
-      localStorage.setItem("loggedInEmail", data.email);
+  try {
+    const response = await axios.post(
+      "http://localhost:5000/v1/api/employees/otp/send",
+      { email }
+    );
+
+
+    if (response.status === 200 && response.data.success) {
+      localStorage.setItem("loggedInEmail", email);
       alert(response.data.message || "OTP sent successfully!");
       setOtpSent(true);
       setOtpAnchorEl(true);
-    } catch (error) {
-      console.error("Send OTP Error:", error.response?.data || error.message);
-      alert(
-        "Failed to send OTP: " +
-          (error.response?.data.message || "Error occurred")
-      );
+    } else {
+      throw new Error(response.data.message || "Failed to send OTP");
     }
-  };
+  } catch (error) {
+    console.error("Send OTP Error:", error.response?.data || error.message);
+    alert(
+      "Failed to send OTP: " +
+        (error.response?.data?.message || error.message || "Error occurred")
+    );
+  }
+};
+
 
   const handleVerifyOtp = async () => {
     const email = getValues("email");
