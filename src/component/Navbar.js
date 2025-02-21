@@ -61,7 +61,7 @@ function Navbar() {
 
           <Box sx={{ flexGrow: 0 }}>
             <Stack direction="row" spacing={2}>
-              <NavLink to="/Addemployee">
+              {/* <NavLink to="/Addemployee">
                 <Button
                   sx={{
                     textTransform: "none",
@@ -79,7 +79,7 @@ function Navbar() {
                 >
                   Signup
                 </Button>
-              </NavLink>
+              </NavLink> */}
 
               {!isAuthenticated ? (
                 <>

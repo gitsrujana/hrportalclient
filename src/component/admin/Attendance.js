@@ -13,6 +13,7 @@ import {
   useMediaQuery,
   IconButton,
   TextField,
+  Alert,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import Sidebar from "./Sidebar";
@@ -20,6 +21,11 @@ import EmployeeAttendanceDetails from "./EmployeeAttendanceDetails ";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+const nationalHolidays = [
+  { date: new Date(2025, 0, 1), name: "New Year's Day" },
+  { date: new Date(2025, 6, 4), name: "Independence Day" },
+  { date: new Date(2025, 11, 25), name: "Christmas Day" },
+];
 
 const AttendanceTable = () => {
   const theme = useTheme();
@@ -31,7 +37,7 @@ const AttendanceTable = () => {
   const loggedInEmail = localStorage.getItem("loggedInEmail");
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
-
+  const [message, setMessage] = useState("");
   useEffect(() => {
     const fetchAttendanceData = async () => {
       try {
@@ -60,20 +66,43 @@ const AttendanceTable = () => {
 
   const handleDateChange = (date) => {
     setSelectedDate(date);
+    setMessage(""); // Reset message initially
+  
     if (date) {
+      const day = date.getDay(); // Get day of the week (0 = Sunday, 6 = Saturday)
+      const formattedDate = date.toDateString(); // Convert date to string for comparison
+  
+      const isHoliday = nationalHolidays.find(
+        (holiday) => holiday.date.toDateString() === formattedDate
+      );
+  
+      if (day === 0) {
+        setMessage("Today is Sunday, it's a weekend!");
+      } else if (day === 6) {
+        setMessage("Today is Saturday, it's a weekend!");
+      } else if (isHoliday) {
+        setMessage(`Today is a national holiday: ${isHoliday.name}`);
+      }
+  
+      // Filter attendance data based on selected date
       const filtered = attendanceData.filter((attendance) => {
         const attendanceDate = new Date(attendance.date);
-        return (
-          attendanceDate.getFullYear() === date.getFullYear() &&
-          attendanceDate.getMonth() === date.getMonth() &&
-          attendanceDate.getDate() === date.getDate()
-        );
+        return attendanceDate.toDateString() === formattedDate;
       });
+  
       setFilteredData(filtered);
+  
+      // If no records exist for the date, show a message
+      if (filtered.length === 0) {
+        setMessage((prevMessage) =>
+          prevMessage ? prevMessage + " No attendance records found." : "No records found for the selected date."
+        );
+      }
     } else {
-      setFilteredData(attendanceData);
+      setFilteredData(attendanceData); // Reset filter if no date is selected
     }
   };
+  
 
   return (
     <>
@@ -104,18 +133,9 @@ const AttendanceTable = () => {
         </Typography>
 
         <LocalizationProvider dateAdapter={AdapterDateFns}>
-          <DatePicker
-            label="Select Date"
-            value={selectedDate}
-            onChange={handleDateChange}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                sx={{ marginTop: "1%", marginLeft: "50%" }}
-              />
-            )}
-          />
+          <DatePicker label="Select Date" value={selectedDate} onChange={handleDateChange} renderInput={(params) => <TextField {...params} sx={{ marginTop: "1%", marginLeft: "50%" }} />} />
         </LocalizationProvider>
+        {message && <Alert severity="info" sx={{ marginTop: "1%",color:"red" }}>{message}</Alert>}
 
         <TableContainer
           component={Paper}

@@ -1,6 +1,8 @@
 import { Typography } from '@mui/material'
 import React from 'react'
 
+
+
 const Homepage = () => {
   return (
     <>
@@ -18,7 +20,7 @@ const Homepage = () => {
       >
         Welcome to Trie Tree Technology Pvt. Ltd.
       </Typography>
-      
+    
     </>
   )
 }

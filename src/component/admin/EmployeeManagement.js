@@ -24,6 +24,7 @@ import { Alert } from "@mui/lab";
 import { useTheme } from "@mui/material/styles";
 import Sidebar from "./Sidebar";
 import EmployeeAttendanceDetails from "./EmployeeAttendanceDetails ";
+import { useNavigate } from "react-router-dom";
 
 const Header = styled(Box)(() => ({
   backgroundColor: "#006666",
@@ -45,7 +46,10 @@ const EmployeeManagement = () => {
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
   const [selectedEmployeeEmail, setSelectedEmployeeEmail] = useState(null);
-
+const navigate=useNavigate()
+const onsubmit =( )=>{
+  navigate("/addemployee")
+}
   useEffect(() => {
     fetchEmployees();
     fetchAttendanceData();
@@ -141,6 +145,25 @@ const EmployeeManagement = () => {
           marginTop: "5%",
         }}
       >
+            
+           <Button
+                    type="submit"
+                    variant="contained"
+                    sx={{
+                      background: "#006666",
+                      color: "#fff",
+                      textTransform: "none",
+                      fontSize: "16px",
+                      fontWeight: "bold",
+                      borderRadius: "8px",
+                      marginLeft:isMobile?"60%":"85%",
+                      marginTop: isMobile ? "5%" : "2%",
+                      "&:hover": { background: "#006666" },
+                    }}
+                   onClick={(onsubmit)}
+                  >
+                    Add Employee
+                  </Button>
         <Typography
           sx={{
             backgroundColor: "#006666",

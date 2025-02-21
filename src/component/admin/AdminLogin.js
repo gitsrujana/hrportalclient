@@ -124,7 +124,11 @@ const AdminLogin = () => {
       setOtpSent(false);
       setOtpAnchorEl(null);
       login();
-      navigate("/dashboard");
+      if (response.status === 200) {
+        localStorage.setItem("adminToken", response.data.token);
+        navigate("/dashboard");
+      }
+      
     } catch (error) {
       console.error("Verify OTP Error:", error.response?.data || error.message);
       alert(

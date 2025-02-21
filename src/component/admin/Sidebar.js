@@ -38,6 +38,7 @@ const Sidebar = () => {
     { text: "Profile", icon: <PersonIcon />, path: "/profile" },
     { text: "Attendance", icon: <TodayIcon />, path: "/attendance" },
   ];
+  
 
   const handleToggle = () => {
     setOpen(!open);
