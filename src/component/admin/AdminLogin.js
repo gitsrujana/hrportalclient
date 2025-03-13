@@ -23,7 +23,7 @@ const AdminLogin = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [adminEmail, setAdminEmail] = useState("");
-  const { login } = useAuth();
+  // const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
@@ -49,7 +49,7 @@ const AdminLogin = () => {
       localStorage.setItem("loggedInEmail", data.email);
       const message = response.data.message;
       alert(message);
-      login();
+      // login();
       navigate("/dashboard"); 
     } catch (error) {
       console.error("Login Error:", error.response?.data || error.message);
@@ -123,7 +123,7 @@ const AdminLogin = () => {
       alert(response.data.message || "Login successful!");
       setOtpSent(false);
       setOtpAnchorEl(null);
-      login();
+      // login();
       if (response.status === 200) {
         localStorage.setItem("adminToken", response.data.token);
         navigate("/dashboard");

@@ -30,7 +30,7 @@ function App() {
         <Navbar />
         <AdminAuthProvider>
           <Routes>
-        <Route path="/admin-login" element={<AdminLogin />} />
+        <Route path="/Admin" element={<AdminLogin />} />
 
           {/* Protected Admin Routes */}
          

@@ -23,8 +23,13 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 const nationalHolidays = [
   { date: new Date(2025, 0, 1), name: "New Year's Day" },
-  { date: new Date(2025, 6, 4), name: "Independence Day" },
-  { date: new Date(2025, 11, 25), name: "Christmas Day" },
+  { date: new Date(2025, 1, 26), name: "Republic  Day" },
+  { date: new Date(2025, 10, 2), name: "Gandhi Jayanti" },
+  { date: new Date(2025, 5, 1), name: "May Day" },
+  { date: new Date(2025, 8, 15), name: "Independence  Day" },
+  { date: new Date(2025, 12, 25), name: "Christmas Day" },
+  { date: new Date(2025, 4, 18), name: "Good Friday" },
+
 ];
 
 const AttendanceTable = () => {
@@ -66,11 +71,11 @@ const AttendanceTable = () => {
 
   const handleDateChange = (date) => {
     setSelectedDate(date);
-    setMessage(""); // Reset message initially
+    setMessage(""); 
   
     if (date) {
-      const day = date.getDay(); // Get day of the week (0 = Sunday, 6 = Saturday)
-      const formattedDate = date.toDateString(); // Convert date to string for comparison
+      const day = date.getDay(); 
+      const formattedDate = date.toDateString(); 
   
       const isHoliday = nationalHolidays.find(
         (holiday) => holiday.date.toDateString() === formattedDate
@@ -84,7 +89,7 @@ const AttendanceTable = () => {
         setMessage(`Today is a national holiday: ${isHoliday.name}`);
       }
   
-      // Filter attendance data based on selected date
+      
       const filtered = attendanceData.filter((attendance) => {
         const attendanceDate = new Date(attendance.date);
         return attendanceDate.toDateString() === formattedDate;
@@ -92,14 +97,14 @@ const AttendanceTable = () => {
   
       setFilteredData(filtered);
   
-      // If no records exist for the date, show a message
+     
       if (filtered.length === 0) {
         setMessage((prevMessage) =>
           prevMessage ? prevMessage + " No attendance records found." : "No records found for the selected date."
         );
       }
     } else {
-      setFilteredData(attendanceData); // Reset filter if no date is selected
+      setFilteredData(attendanceData); 
     }
   };
   
@@ -150,7 +155,7 @@ const AttendanceTable = () => {
                 <TableCell sx={{ fontWeight: "bold" }}>
                   Check-out Time
                 </TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>Working Hours</TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>Work Hours</TableCell>
                 <TableCell sx={{ fontWeight: "bold" }}>Status</TableCell>
               </TableRow>
             </TableHead>

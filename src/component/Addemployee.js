@@ -250,7 +250,7 @@ const Addemployee = () => {
             value={formData.category}
             onChange={handleChange}
           >
-            <MenuItem value="IT">IT</MenuItem>
+            <MenuItem value="IT">Hr</MenuItem>
             <MenuItem value="Designer">Designer</MenuItem>
             <MenuItem value="Developer">Developer</MenuItem>
           </TextField>

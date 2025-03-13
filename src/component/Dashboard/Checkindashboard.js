@@ -199,7 +199,7 @@ const Checkindashboard = () => {
                   color: "white",
                 }}
               >
-                Working Hours
+                Work Hours
               </TableCell>
             </TableRow>
           </TableHead>
